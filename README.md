@@ -5,7 +5,7 @@
   <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher/logo.png" alt="Spatial Audio Switcher Logo" width="150px" height="150px">
 </div>
 
-A simple taskbar tray application created with AutoHotkey v2.0+ that provides quick access to various audio settings.
+A simple taskbar tray application created with AutoHotkey v2.0+ provides quick access to various audio settings.
 
 **Original Author**: Tremontaine  
 **Modified by**: [DestructiveBurn](http://destructiveburn.com/destructiveburn)  
@@ -50,10 +50,10 @@ A simple taskbar tray application created with AutoHotkey v2.0+ that provides qu
 Quickly adjust individual application volumes.
 
 ### 🖥️ Show/Hide Desktop Icons
-Double-click on desktop to toggle icon visibility.
+Double-click on the desktop to toggle icon visibility.
 
 ### 🚀 Start With Windows
-Adds shortcut to:  
+Adds a shortcut to:  
 `C:\Users\USERNAME\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup`
 
 ### 🔄 Other Functions
@@ -67,7 +67,7 @@ Adds shortcut to:
   <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher/1.png" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
 </div>
 
-- This one is opened by right-clicking on on the tray icon.
+- This one is opened by right-clicking on the tray icon.
 <div>
   <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher/2.png" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
 </div>
@@ -79,7 +79,7 @@ Adds shortcut to:
 4. Both SoundVolumeCommandLine & SoundVolumeView files go into the Resources directory. (SoundVolumeView.exe & svcl.exe)
 5. Place the folder in a permanent location (portable tool)
 6. Click on Spatial Audio Switcher.exe
-7. Check taskbar tray location for the icon.
+7. Check the taskbar tray location for the icon.
 
 ## 🛠️ Requirements
 - AutoHotkey v2.0+
@@ -122,7 +122,7 @@ When compiling the AHK script to EXE, some antivirus engines may flag the output
   - Compiling it yourself with [AutoHotkey v2+](https://www.autohotkey.com/)
   - Scanning with your preferred antivirus
 
-I personally guarantee the code is clean - I wouldn't invest time improving unsafe software. These false positives are an unfortunate reality of script-based tools.
+I guarantee the code is clean - I wouldn't invest time improving unsafe software. These false positives are an unfortunate reality of script-based tools.
 </details>
 
 ## VirusTotal
