@@ -7,8 +7,8 @@ About GUI Function
 ShowAbout(*)
 {
     ; Version info
-    version := "v1.02"
-    date := "2025-07-03"
+    version := "v1.03"
+    date := "2025-07-04"
     author := "DestructiveBurn"
     website := "https://github.com/DestructiveBurn/spatial-audio-switcher/"
     github := "https://github.com/Tremontaine/spatial-audio-switcher"
@@ -27,22 +27,27 @@ ShowAbout(*)
     ; Update List - now with proper left alignment
     changelog := "
     (LTrim
-    [ChangeLog]
+    [ChangeLog v1.02]
     • Spatial Audio Formats:
-      - Added Dolby Atmos for Home Theater support
-      - Added DTS:X for Home Theater support
+      - Added Dolby Atmos for Home Theater support.
+      - Added DTS:X for Home Theater support.
 
     • Speaker Configurations:
-      - Added Quadraphonic (4.0) speaker setup
+      - Added Quadraphonic (4.0) speaker setup.
 
     • User Interface:
-      - Added "Start with Windows" option
+      - Added "Start with Windows" option.
 	  - Added bunch of icons in the UI.
-      - Added developer website link
-      - Added link to original source code
+      - Added developer website link.
+      - Added link to original source code.
     
     • Show/Hide Desktop Icons:
       - As an added bonus I have added the ability to show/hide icons when you double-click on the desktop.
+    
+	[ChangeLog v1.03]
+    • Changes & Addons
+      - Changed Show/Hide from double-click to triple-click.
+	  - Added donate link under about.
     )"
     
     aboutGui.Add("Text", "x20 y+10 w360", changelog) ; Left-aligned with margin
@@ -90,40 +95,54 @@ Show/Hide Function
 
 ; Global Variables
 	global desktopIconsVisible := true
-	global doubleClickEnabled := false  ; Default to disabled
+	global tripleClickEnabled := false  ; Changed from doubleClickEnabled to tripleClickEnabled
 	global configFile := "SpatialAudioSwitcher.ini"
-
 
 ; Load saved state from INI file
 	if FileExist(configFile) {
-		doubleClickEnabled := IniRead(configFile, "DesktopIcons", "DoubleClickEnabled", "0")
-		doubleClickEnabled := (doubleClickEnabled = "1")
+		tripleClickEnabled := IniRead(configFile, "DesktopIcons", "TripleClickEnabled", "0")  ; Changed key name
+		tripleClickEnabled := (tripleClickEnabled = "1")
 	}
 
 ; Desktop Icons Toggle
 	ToggleDesktopIcons(*) {
-		global doubleClickEnabled, configFile
-		doubleClickEnabled := !doubleClickEnabled
-	; Save state to INI file
-		IniWrite(doubleClickEnabled ? "1" : "0", configFile, "DesktopIcons", "DoubleClickEnabled")
+		global tripleClickEnabled, configFile
+		tripleClickEnabled := !tripleClickEnabled
+		; Save state to INI file
+		IniWrite(tripleClickEnabled ? "1" : "0", configFile, "DesktopIcons", "TripleClickEnabled")  ; Changed key name
 		UpdateDesktopIconsMenu()
 	}
 
 ; Update menu checkmark
 	UpdateDesktopIconsMenu() {
-		global doubleClickEnabled
-		if (doubleClickEnabled) {
-			Tray.Check("Shows/Hide Desktop Icons Double-Click")
+		global tripleClickEnabled
+		if (tripleClickEnabled) {
+			Tray.Check("Shows/Hide Desktop Icons Triple-Click")  ; Updated text
 		} else {
-			Tray.Uncheck("Shows/Hide Desktop Icons Double-Click")
+			Tray.Uncheck("Shows/Hide Desktop Icons Triple-Click")  ; Updated text
 		}
 	}
 
-; Double-click hotkey
-	#HotIf WinActive("ahk_class Progman") && doubleClickEnabled
+; Triple-click hotkey
+	#HotIf WinActive("ahk_class Progman") && tripleClickEnabled
 	~LButton::
 	{
-		if (A_PriorHotkey = "~LButton" && A_TimeSincePriorHotkey < 400) {  ; Double-click
+		static clickCount := 0
+		static lastClickTime := 0
+    
+		currentTime := A_TickCount
+		timeSinceLastClick := currentTime - lastClickTime
+    
+		if (timeSinceLastClick > 400) {  ; Reset if too much time between clicks
+			clickCount := 1
+		} else {
+			clickCount += 1
+		}
+    
+		lastClickTime := currentTime
+    
+		if (clickCount = 3) {  ; Triple-click detected
+			clickCount := 0  ; Reset counter
 			global desktopIconsVisible
 			try {
 				if (hwnd := ControlGetHwnd("SysListView321", "ahk_class Progman")) {
@@ -610,13 +629,11 @@ Populate Menus
 		; Seperator.
 			Tray.Add
 			
-		; I want desktop icons toggle here.
-
 		; Toggle Show/Hide Desktop Icons
-			Tray.Add("Shows/Hide Desktop Icons Double-Click", ToggleDesktopIcons)
-			Tray.SetIcon "Shows/Hide Desktop Icons Double-Click", "Icons\showhide.ico"
+			Tray.Add("Shows/Hide Desktop Icons Triple-Click", ToggleDesktopIcons)  ; Updated text
+			Tray.SetIcon "Shows/Hide Desktop Icons Triple-Click", "Icons\showhide.ico"
 			UpdateDesktopIconsMenu()  ; Set initial state
-		
+
 		; Seperator.
 			Tray.Add
 
@@ -641,6 +658,10 @@ Populate Menus
 		; About Menu
 			Tray.Add("About", ShowAbout)
 			Tray.SetIcon "About", "Icons\about.ico"
+
+		; Donate Link
+			Tray.Add("Donate", (*) => Run("https://www.paypal.com/donate?hosted_button_id=ZJGYBNSCSDFBG"))
+			Tray.SetIcon "Donate", "Icons\donate.ico"
 
 	; Simple tray menu. (Open with a left click on the tray icon)
 		
