@@ -7,11 +7,14 @@ About GUI Function
 ShowAbout(*)
 {
     ; Version info
-    version := "v1.03"
-    date := "2025-07-04"
+    version := "v1.04"
+    date := "2025-09-23"
     author := "DestructiveBurn"
-    website := "https://github.com/DestructiveBurn/spatial-audio-switcher/"
-    github := "https://github.com/Tremontaine/spatial-audio-switcher"
+    dbUpdates := "https://destructiveburn.com/spatial-audio-switcher/"
+	dbgitUpdates := "https://github.com/DestructiveBurn/spatial-audio-switcher/"
+    originalSource := "https://github.com/Tremontaine/spatial-audio-switcher"
+    soundVolCmd := "https://www.nirsoft.net/utils/sound_volume_command_line.html"
+    soundVolView := "https://www.nirsoft.net/utils/sound_volume_view.html"
 
     ; Create compact GUI
     aboutGui := Gui("+AlwaysOnTop -SysMenu -Caption +Border", "About Spatial Audio Switcher")
@@ -24,68 +27,65 @@ ShowAbout(*)
     aboutGui.Add("Text", "x10 y+10 w380 0x10") ; Horizontal line
 
     ;-----ChangeLog-----
-    ; Update List - now with proper left alignment
     changelog := "
     (LTrim
-    [ChangeLog v1.02]
-    • Spatial Audio Formats:
-      - Added Dolby Atmos for Home Theater support.
-      - Added DTS:X for Home Theater support.
 
-    • Speaker Configurations:
-      - Added Quadraphonic (4.0) speaker setup.
-
-    • User Interface:
-      - Added "Start with Windows" option.
-	  - Added bunch of icons in the UI.
-      - Added developer website link.
-      - Added link to original source code.
-    
-    • Show/Hide Desktop Icons:
-      - As an added bonus I have added the ability to show/hide icons when you double-click on the desktop.
-    
-	[ChangeLog v1.03]
+    [ChangeLog v1.03]
     • Changes & Addons
       - Changed Show/Hide from double-click to triple-click.
-	  - Added donate link under about.
+      - Added donate link under about.
+
+    [ChangeLog v1.04]
+    • Changes & Addons
+      - Fixed settings persistence: Spatial Audio, Speaker Configuration, Default Format, and Exclusivity are now properly remembered
+      - Added INI file support to save and restore user preferences between sessions
+      - Settings are preserved when closing and reopening the application
+      - No more forced resets - user choices are maintained
+
     )"
-    
     aboutGui.Add("Text", "x20 y+10 w360", changelog) ; Left-aligned with margin
     ;-----ChangeLog-----
-    
+
     aboutGui.Add("Text", "x10 y+10 w380 0x10") ; Horizontal line
-    
+
     ; Links section with icons and "Here" links
-    ; First link row
+
+    ; First link row - DB Updates
     aboutGui.Add("Picture", "x20 y+10 w16 h16", "Icons\DB.ico")
-    aboutGui.Add("Text", "x+5 yp+3", "DB Updates: ")
+    aboutGui.Add("Text", "x+5 yp+3", "DB Updates (Recommended): ")
     linkHere1 := aboutGui.Add("Text", "x+0 yp c0099FF", "Here")
-    linkHere1.OnEvent("Click", (*) => Run(website))
-    
-    ; Second link row
+    linkHere1.OnEvent("Click", (*) => Run(dbUpdates))
+
+    ; Second link row - DB GitHub Updates
+    aboutGui.Add("Picture", "x20 y+5 w16 h16", "Icons\gh.ico")
+    aboutGui.Add("Text", "x+5 yp+3", "DB GitHub Updates: ")
+    linkHere2 := aboutGui.Add("Text", "x+0 yp c0099FF", "Here")
+    linkHere2.OnEvent("Click", (*) => Run(dbgitUpdates))
+
+    ; Third link row - Original Source
     aboutGui.Add("Picture", "x20 y+5 w16 h16", "Icons\gh.ico")
     aboutGui.Add("Text", "x+5 yp+3", "Original Source: ")
     linkHere2 := aboutGui.Add("Text", "x+0 yp c0099FF", "Here")
-    linkHere2.OnEvent("Click", (*) => Run(github))
-    
-    ; Third link row (SoundVolumeCommandLine)
+    linkHere2.OnEvent("Click", (*) => Run(originalSource))
+
+    ; Fourth link row - SoundVolumeCommandLine
     aboutGui.Add("Picture", "x20 y+5 w16 h16", "Icons\nirsoft.ico")
     aboutGui.Add("Text", "x+5 yp+3", "SoundVolumeCommandLine: ")
     linkHere3 := aboutGui.Add("Text", "x+0 yp c0099FF", "Here")
-    linkHere3.OnEvent("Click", (*) => Run("https://www.nirsoft.net/utils/sound_volume_command_line.html"))
-    
-    ; Fourth link row (SoundVolumeView)
+    linkHere3.OnEvent("Click", (*) => Run(soundVolCmd))
+
+    ; Fith link row - SoundVolumeView
     aboutGui.Add("Picture", "x20 y+5 w16 h16", "Icons\nirsoft.ico")
     aboutGui.Add("Text", "x+5 yp+3", "SoundVolumeView: ")
     linkHere4 := aboutGui.Add("Text", "x+0 yp c0099FF", "Here")
-    linkHere4.OnEvent("Click", (*) => Run("https://www.nirsoft.net/utils/sound_volume_view.html"))
-    
+    linkHere4.OnEvent("Click", (*) => Run(soundVolView))
+
     aboutGui.Add("Text", "x10 y+10 w380 0x10") ; Horizontal line
-    
+
     ; Close button
     btnClose := aboutGui.Add("Button", "x150 y+10 w100 h30", "Close")
     btnClose.OnEvent("Click", (*) => aboutGui.Destroy())
-    
+
     aboutGui.Show("AutoSize")
 }
 
@@ -158,14 +158,123 @@ Show/Hide Function
 	}
 	#HotIf
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+; Global variables to track current settings
+global currentSpatial := ""
+global currentSpeakerConfig := "Stereo"
+global currentDefaultFormat := "16 Bit, 44100 Hz"
+global currentExclusivity := "Not Exclusive"
+
+; Save current settings to INI file
+SaveCurrentSettings() {
+    global currentSpatial, currentSpeakerConfig, currentDefaultFormat, currentExclusivity, configFile
+    IniWrite(currentSpatial, configFile, "AudioSettings", "Spatial")
+    IniWrite(currentSpeakerConfig, configFile, "AudioSettings", "SpeakerConfig")
+    IniWrite(currentDefaultFormat, configFile, "AudioSettings", "DefaultFormat")
+    IniWrite(currentExclusivity, configFile, "AudioSettings", "Exclusivity")
+}
+
+; Restore saved settings on startup
+RestoreSavedSettings() {
+    global currentSpatial, currentSpeakerConfig, currentDefaultFormat, currentExclusivity, configFile
+    
+    ; Load saved settings
+    savedSpatial := IniRead(configFile, "AudioSettings", "Spatial", "")
+    savedSpeakerConfig := IniRead(configFile, "AudioSettings", "SpeakerConfig", "Stereo")
+    savedDefaultFormat := IniRead(configFile, "AudioSettings", "DefaultFormat", "16 Bit, 44100 Hz")
+    savedExclusivity := IniRead(configFile, "AudioSettings", "Exclusivity", "Not Exclusive")
+    
+    ; Apply the saved settings
+    if (savedSpatial != "") {
+        ApplySpatialSetting(savedSpatial)
+    }
+    ApplySpeakerConfig(savedSpeakerConfig)
+    ApplyDefaultFormat(savedDefaultFormat)
+    ApplyExclusivity(savedExclusivity)
+}
+
+; Helper functions to apply settings
+ApplySpatialSetting(spatialType) {
+    global currentSpatial
+    currentSpatial := spatialType
+    
+    switch spatialType {
+        case "Dolby Atmos": DolbyAtmosEnable()
+        case "Dolby Atmos HT": DolbyAtmosHTEnable()
+        case "DTS": DTSEnable()
+        case "DTS:X HT": DTSXHTEnable()
+        case "Windows Sonic": SonicEnable()
+     
+    }
+}
+
+ApplySpeakerConfig(config) {
+    global currentSpeakerConfig
+    currentSpeakerConfig := config
+    
+    switch config {
+        case "Stereo": Stereo()
+        case "Quadraphonic": Quadraphonic()
+        case "5.1": FivePointOne()
+        case "7.1": SevenPointOne()
+    }
+}
+
+ApplyDefaultFormat(format) {
+    global currentDefaultFormat
+    currentDefaultFormat := format
+    
+    switch format {
+        case "16 Bit, 44100 Hz": df1644()
+        case "16 Bit, 48000 Hz": df1648()
+        case "16 Bit, 96000 Hz": df1696()
+        case "16 Bit, 192000 Hz": df16192()
+        case "24 Bit, 44100 Hz": df2444()
+        case "24 Bit, 48000 Hz": df2448()
+        case "24 Bit, 96000 Hz": df2496()
+        case "24 Bit, 192000 Hz": df24192()
+    }
+}
+
+ApplyExclusivity(exclusive) {
+    global currentExclusivity
+    currentExclusivity := exclusive
+
+    if (exclusive = "Exclusive") {
+        SetExclusive()
+    } else {
+        SetNonExclusive()
+    }
+}
+
+
+
+
+
+
+
+
+
 /*----------------
 Menu
 ----------------*/
 
-Run "Resources\svcl.exe /SetSpatial `"DefaultRenderDevice`" `"`"", , "Hide"
-Run "Resources\svcl.exe /SetSpeakersConfig `"DefaultRenderDevice`" 0x3 0x3 0x3", , "Hide"
-Run "Resources\svcl.exe /SetDefaultFormat `"DefaultRenderDevice`" 16 44100", , "Hide"
-Run "Resources\svcl.exe /SetAllowExclusive `"DefaultRenderDevice`" 0", , "Hide"
 
 
 ; delete AutoHotkey's default tray items.
@@ -224,6 +333,9 @@ Define functions.
 			Tray.Add "Disabled", Empty
 			Tray.Disable "&Disable Spatial Audio"
 			SpatialMenu.Disable "&Disable Spatial Audio"
+			
+			global currentSpatial := ""
+			SaveCurrentSettings()
 		}
 	
 	; Enable Dolby Atmos for Headphones.
@@ -237,6 +349,9 @@ Define functions.
 			Tray.Rename "1&", "Dolby Atm&os for Headphones"
 			Tray.SetIcon "Dolby Atm&os for Headphones", "Icons\dolby.ico"
 			Tray.Add "Dolby Atm&os for Headphones", DolbyAccess
+			
+			global currentSpatial := "Dolby Atmos"
+			SaveCurrentSettings()
 		}
 		
 	; Run Dolby Access.
@@ -256,6 +371,9 @@ Define functions.
 			Tray.Rename "1&", "Dolby Atm&os for Home Theater"
 			Tray.SetIcon "Dolby Atm&os for Home Theater", "Icons\dolby.ico"
 			Tray.Add "Dolby Atm&os for Home Theater", DolbyAccess
+			
+			global currentSpatial := "Dolby Atmos HT"
+			SaveCurrentSettings()
 		}
 
 	; Enable DTS Headphone:X.
@@ -269,6 +387,9 @@ Define functions.
 			Tray.Rename "1&", "DTS Headphone:&X"
 			Tray.SetIcon "DTS Headphone:&X", "Icons\dts.ico"
 			Tray.Add "DTS Headphone:&X", DTSSoundUnbound
+			
+			global currentSpatial := "DTS"
+			SaveCurrentSettings()
 		}
 
 	; Run DTS Sound Unbound.
@@ -288,6 +409,9 @@ Define functions.
 			Tray.Rename "1&", "DTS:&X for Home Theater"
 			Tray.SetIcon "DTS:&X for Home Theater", "Icons\dts.ico"
 			Tray.Add "DTS:&X for Home Theater", DTSSoundUnbound
+			
+			global currentSpatial := "DTS:X HT"
+			SaveCurrentSettings()
 		}
 	
 	; Enable Windows Sonic for Headphones.
@@ -301,6 +425,9 @@ Define functions.
 			Tray.Rename "1&", "Windows Sonic for Headphones"
 			Tray.SetIcon "Windows Sonic for Headphones", "Icons\sonic.ico"
 			Tray.Add "Windows Sonic for Headphones", Empty
+			
+			global currentSpatial := "Windows Sonic"
+			SaveCurrentSettings()
 		}
 		
 	; Run SoundVolumeView, our advanced sound device manager.
@@ -328,19 +455,26 @@ Define functions.
 		}
 		
 	; Allow applications to take exclusive control of the default device.
-		Exclusive(*)
+	
+		
+	SetExclusive(*)
 		{
 			Run "Resources\svcl.exe /SetAllowExclusive `"DefaultRenderDevice`" 1", , "Hide"
 			Exclusivity.Check "&Exclusive"
 			Exclusivity.Uncheck "&Not Exclusive"
+
+			global currentExclusivity := "Exclusive"
+			SaveCurrentSettings()
 		}
-		
-	; Do not allow applications to take exclusive control of default device.
-		NonExclusive(*)
+
+	SetNonExclusive(*)
 		{
 			Run "Resources\svcl.exe /SetAllowExclusive `"DefaultRenderDevice`" 0", , "Hide"
 			Exclusivity.Uncheck "&Exclusive"
 			Exclusivity.Check "&Not Exclusive"
+
+			global currentExclusivity := "Not Exclusive"
+			SaveCurrentSettings()
 		}
 
 	; Default Stereo: FL | FR = 0x3
@@ -351,6 +485,9 @@ Define functions.
 			Configuration.Uncheck "&Quadraphonic"
 			Configuration.Uncheck "&5.1"
 			Configuration.Uncheck "&7.1"
+			
+			global currentSpeakerConfig := "Stereo"
+			SaveCurrentSettings()
 		}
 		
 	; Set to Quadraphonic: FL | FR | RL | RR = 0x33
@@ -361,6 +498,9 @@ Define functions.
 			Configuration.Check "&Quadraphonic"
 			Configuration.Uncheck "&5.1"
 			Configuration.Uncheck "&7.1"
+			
+			global currentSpeakerConfig := "Quadraphonic"
+			SaveCurrentSettings()
 		}
 
 	; Set to 5.1: FL | FC | FR | SL | SR | Sub = 0x3f
@@ -371,6 +511,9 @@ Define functions.
 			Configuration.Uncheck "&Quadraphonic"
 			Configuration.Check "&5.1"
 			Configuration.Uncheck "&7.1"
+			
+			global currentSpeakerConfig := "5.1"
+			SaveCurrentSettings()
 		}
 	
 	; Set to 7.1: FL | FC | FR | SL | SR | RL | RR | Sub = 0x63f
@@ -381,6 +524,9 @@ Define functions.
 			Configuration.Uncheck "&Quadraphonic"
 			Configuration.Uncheck "&5.1"
 			Configuration.Check "&7.1"
+			
+			global currentSpeakerConfig := "7.1"
+			SaveCurrentSettings()
 		}
 
 	; Default to 16 bit, 44100 Hz.
@@ -395,6 +541,9 @@ Define functions.
 			DefaultFormat.Uncheck "24 Bit, 48000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 96000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 192000 Hz"
+			
+			global currentDefaultFormat := "16 Bit, 44100 Hz"
+			SaveCurrentSettings()
 		}
 		
 	; Default to 16 bit, 48000 Hz.
@@ -409,6 +558,9 @@ Define functions.
 			DefaultFormat.Uncheck "24 Bit, 48000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 96000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 192000 Hz"
+			
+			global currentDefaultFormat := "16 Bit, 48000 Hz"
+			SaveCurrentSettings()
 		}
 		
 	; Default to 16 bit, 96000 Hz.
@@ -423,6 +575,9 @@ Define functions.
 			DefaultFormat.Uncheck "24 Bit, 48000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 96000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 192000 Hz"
+			
+			global currentDefaultFormat := "16 Bit, 96000 Hz"
+			SaveCurrentSettings()
 		}
 		
 	; Default to 16 bit, 192000 Hz.
@@ -437,6 +592,9 @@ Define functions.
 			DefaultFormat.Uncheck "24 Bit, 48000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 96000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 192000 Hz"
+			
+			global currentDefaultFormat := "16 Bit, 192000 Hz"
+			SaveCurrentSettings()
 		}
 		
 	; Default to 24 bit, 44100 Hz.
@@ -451,6 +609,9 @@ Define functions.
 			DefaultFormat.Uncheck "24 Bit, 48000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 96000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 192000 Hz"
+			
+			global currentDefaultFormat := "24 Bit, 44100 Hz"
+			SaveCurrentSettings()
 		}
 	
 	; Default to 24 bit, 48000 Hz.
@@ -465,6 +626,9 @@ Define functions.
 			DefaultFormat.Check "24 Bit, 48000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 96000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 192000 Hz"
+			
+			global currentDefaultFormat := "24 Bit, 48000 Hz"
+			SaveCurrentSettings()
 		}
 		
 	; Default to 24 bit, 96000 Hz.
@@ -479,6 +643,9 @@ Define functions.
 			DefaultFormat.Uncheck "24 Bit, 48000 Hz"
 			DefaultFormat.Check "24 Bit, 96000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 192000 Hz"
+			
+			global currentDefaultFormat := "24 Bit, 96000 Hz"
+			SaveCurrentSettings()
 		}
 		
 	; Default to 24 bit, 192000 Hz.
@@ -493,6 +660,9 @@ Define functions.
 			DefaultFormat.Uncheck "24 Bit, 48000 Hz"
 			DefaultFormat.Uncheck "24 Bit, 96000 Hz"
 			DefaultFormat.Check "24 Bit, 192000 Hz"
+			
+			global currentDefaultFormat := "24 Bit, 192000 Hz"
+			SaveCurrentSettings()
 		}
 
 	; Startup Checker
@@ -527,19 +697,18 @@ Define functions.
 	; Reload Spatial Audio Switcher (Loads to default settings.
 		Restart(*)
 		{
+			SaveCurrentSettings()  ; Save settings before reloading
 			Reload
 		}
 		
 	; Exit Spatial Audio Switcher.
 		Exit(*)
 		{
-			Run "Resources\svcl.exe /SetSpatial `"DefaultRenderDevice`" `"`"", , "Hide"
-			Run "Resources\svcl.exe /SetSpeakersConfig `"DefaultRenderDevice`" 0x3 0x3 0x3", , "Hide"
-			Run "Resources\svcl.exe /SetDefaultFormat `"DefaultRenderDevice`" 16 44100", , "Hide"
-			Run "Resources\svcl.exe /SetAllowExclusive `"DefaultRenderDevice`" 0", , "Hide"
+			; Don't change any settings on exit - preserve everything
 			Sleep 0
 			ExitApp
 		}
+
 
 /*----------------
 Populate Menus
@@ -617,9 +786,9 @@ Populate Menus
 		; Exclusivity submenu
 			Tray.Add "&Exclusivity", Exclusivity
 			Tray.SetIcon "&Exclusivity", "Icons\exclusivity.ico"
-			Exclusivity.Add "&Exclusive", Exclusive
+			Exclusivity.Add("&Exclusive", SetExclusive)
 			Exclusivity.SetIcon "&Exclusive", "Icons\exclusivity.ico"
-			Exclusivity.Add "&Not Exclusive", NonExclusive
+			Exclusivity.Add("&Not Exclusive", SetNonExclusive)
 			Exclusivity.SetIcon "&Not Exclusive", "Icons\exclusivity.ico"
 
 		; Application Volume Mixer.
@@ -634,6 +803,8 @@ Populate Menus
 			Tray.SetIcon "Shows/Hide Desktop Icons Triple-Click", "Icons\showhide.ico"
 			UpdateDesktopIconsMenu()  ; Set initial state
 
+
+			
 		; Seperator.
 			Tray.Add
 
@@ -705,21 +876,11 @@ Populate Menus
 			SpatialMenu.Add "&Sound", Traditional
 			SpatialMenu.SetIcon "&Sound", "Icons\as-spe.ico"
 
-		; Make tray menu show default settings.
-			Exclusivity.Uncheck "&Exclusive"
-			Exclusivity.Check "&Not Exclusive"
-			Configuration.Check "&Stereo"
-			Configuration.Uncheck "&Quadraphonic"
-			Configuration.Uncheck "&5.1"
-			Configuration.Uncheck "&7.1"
-			DefaultFormat.Check "16 Bit, 44100 Hz"
-			DefaultFormat.Uncheck "16 Bit, 48000 Hz"
-			DefaultFormat.Uncheck "16 Bit, 96000 Hz"
-			DefaultFormat.Uncheck "16 Bit, 192000 Hz"
-			DefaultFormat.Uncheck "24 Bit, 44100 Hz"
-			DefaultFormat.Uncheck "24 Bit, 48000 Hz"
-			DefaultFormat.Uncheck "24 Bit, 96000 Hz"
-			DefaultFormat.Uncheck "24 Bit, 192000 Hz"
+			
+		; Set initial menu states (these will reflect actual system state)
+		; Note: These are now just initial visual states - actual settings persist from previous session
+
+			
 
 		; Make simple tray menu the default.
 			Tray.Add
@@ -727,9 +888,12 @@ Populate Menus
 			Tray.Default := "Spatial Audio Switcher"
 			Tray.Disable "Spatial Audio Switcher"
 			Tray.ClickCount := 1
-
+		
 		; Windows + Alt + S shortcut can be used to open
-			#!s::SpatialMenu.Show
-		;
+		#!s::SpatialMenu.Show
+
+		; Now safe to restore persistent settings
+		RestoreSavedSettings()
+		
 ; END
 ;
