@@ -2,7 +2,7 @@
 # Spatial Audio Switcher
 
 <div align="center">
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher/logo.png" alt="Spatial Audio Switcher Logo" width="150px" height="150px">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.05/Spatial-Audio-Switcher-2.webp" alt="Spatial Audio Switcher Logo" width="150px" height="150px">
 </div>
 
 A simple taskbar tray application created with AutoHotkey v2.0+ provides quick access to various audio settings.
@@ -66,12 +66,12 @@ Adds a shortcut to:
 ### 🖼️ Preview
 - You can open this menu by left-clicking on the tray icon or using this shortcut Windows + Alt + S shortcut.
 <div>
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher/1.png" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.05/Spatial-Audio-Switcher-3.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
 </div>
 
 - This one is opened by right-clicking on the tray icon.
 <div>
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher/2.png" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.05/Spatial-Audio-Switcher-4.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
 </div>
 
 ## 📥 Installation
