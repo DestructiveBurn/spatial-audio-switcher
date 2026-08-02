@@ -2,25 +2,30 @@
 # Spatial Audio Switcher
 
 <div align="center">
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.05/Spatial-Audio-Switcher-2.webp" alt="Spatial Audio Switcher Logo" width="150px" height="150px">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.06/Spatial-Audio-Switcher-v1.06-2.webp" alt="Spatial Audio Switcher Logo" width="150px" height="150px">
 </div>
 
-A simple taskbar tray application created with AutoHotkey v2.0+ provides quick access to various audio settings.
-
-**Original Author**: Tremontaine  
-**Modified by**: [DestructiveBurn](http://destructiveburn.com/destructiveburn)  
+**Project Maintainer**: [DestructiveBurn](http://destructiveburn.com/destructiveburn)  
 **Tools Used**: [Nirsoft SoundVolumeCommandLine](https://www.nirsoft.net/utils/sound_volume_command_line.html) & [Nirsoft SoundVolumeView](https://www.nirsoft.net/utils/sound_volume_view.html)  
 **Donate**: If you wish to support the work I've done, you can do so here: [Paypal](https://www.paypal.com/donate?hosted_button_id=ZJGYBNSCSDFBG)  
 **DB Main Site Source**: [Spatial Audio Switcher](https://destructiveburn.com/spatial-audio-switcher/)  
 
+<div>
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.06/Spatial-Audio-Switcher-v1.06-1.webp" alt="Spatial Audio Switcher Logo" width="auto" height="400px">
+</div>
+
+## ℹ️ What is Spatial Audio Switcher?
+Spatial Audio Switcher is a lightweight Windows tray utility that lets you quickly switch spatial audio modes such as Dolby Atmos, DTS, Windows Sonic, and other audio configurations. It also provides quick access to speaker configuration, default audio format, exclusivity settings, audio presets, and Windows sound tools.
+
+It runs from the system tray and allows you to change default audio device settings, save and load presets, open Windows sound panels, manage exclusive mode, and quickly toggle supported spatial audio options without digging through Windows settings. Designed with AutoHotkey v2.0, it uses third-party NirSoft tools such as SoundVolumeCommandLine to apply audio changes through command-line functions and SoundVolumeView to provide advanced viewing and management of Windows sound devices.
 
 ## ✨ Features
 
 ### 🎧 Spatial Audio
 - Dolby Atmos for Headphones
-- Dolby Atmos for Home Theater
+- Dolby Atmos for Home Theatre
 - DTS Headphone:X
-- DTS:X for Home Theater
+- DTS:X for Home Theatre
 - Windows Sonic for Headphones
 
 ### ⚙️ Audio Settings
@@ -62,16 +67,17 @@ Adds a shortcut to:
 - **Reload**: Reset all settings to default
 - **Exit**: Close the application
 - **About**: Version information and changelog
+- **Shortcuts**: Displays key combinations to quickly open, adjust or apply.
 
 ### 🖼️ Preview
-- You can open this menu by left-clicking on the tray icon or using this shortcut Windows + Alt + S shortcut.
+- You can open this menu by left-clicking on the tray icon or using the Windows + Alt + S shortcut.
 <div>
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.05/Spatial-Audio-Switcher-3.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.06/Spatial-Audio-Switcher-v1.06-3.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
 </div>
 
 - This one is opened by right-clicking on the tray icon.
 <div>
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.05/Spatial-Audio-Switcher-4.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.06/Spatial-Audio-Switcher-v1.06-4.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
 </div>
 
 ## 📥 Installation
@@ -104,6 +110,13 @@ All icons used in this project are attributed to their respective creators:
 | GitHub             | [Flaticon - GitHub](https://www.flaticon.com/free-icon/github_733553) |
 | Power              | [Flaticon - Power Button](https://www.flaticon.com/free-icon/power-button_3292455) |
 | Monitor            | [Flaticon - LCD](https://www.flaticon.com/free-icon/lcd_9753891) |
+
+
+## ℹ️ About GUI
+On all versions from v1.02, there will be a Changelog in that version of the Spatial Audio Switcher.exe. To see the main changelog, scroll down this page to see the full extent of the updates done below.  On the Spatial Audio Switcher, click on “About” to see the current changelog of that version and “Shortcuts” to see the main shortcuts you can add.
+<div>
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.06/Spatial-Audio-Switcher-v1.06-5.webp" alt="Spatial Audio Switcher Logo" width="auto" height="400px">
+</div>
 
 
 ## 🔒 VirusTotal Verification (False Positives)
