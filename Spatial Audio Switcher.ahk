@@ -3,7 +3,7 @@
 ; ============================================================
 ; Spatial Audio Switcher
 ; Updated by DestructiveBurn
-; v1.06
+; v1.07 (Added Audio Tools & Display/System Quick Switches)
 ; ============================================================
 
 ; ----------------
@@ -20,6 +20,12 @@ global currentSpeakerConfig := "Stereo"
 global currentDefaultFormat := "16 Bit, 44100 Hz"
 global currentExclusivity := "Not Exclusive"
 
+global defaultPresetSlot := 0
+global defaultPresetEnabled := false
+
+global activePresetIcon := ""
+global atmosTimerActive := false
+
 global startupEnabled := false
 global CurrentStatusItem := "Disabled"
 
@@ -32,6 +38,9 @@ global DefaultFormat
 global Exclusivity
 global SpatialApps
 global PresetsMenu
+global DefaultPresetMenu
+global VolumeMenu
+global OutputDevicesMenu
 
 global SpeakerMasks := Map(
     "Stereo",       "0x3",
@@ -51,12 +60,14 @@ global DefaultFormats := Map(
     "24 Bit, 192000 Hz", [24, 192000]
 )
 
-; Load saved desktop icon triple-click setting.
+; Load saved settings
 if FileExist(configFile) {
     tripleClickEnabled := IniRead(configFile, "DesktopIcons", "TripleClickEnabled", "0") = "1"
+    defaultPresetSlot := Integer(IniRead(configFile, "DefaultSettings", "DefaultPresetSlot", "0"))
+    defaultPresetEnabled := IniRead(configFile, "DefaultSettings", "DefaultPresetEnabled", "0") = "1"
 }
 
-; Load startup state.
+; Load startup state
 if FileExist(A_Startup "\Spatial Audio Switcher.lnk") {
     startupEnabled := true
 }
@@ -85,6 +96,9 @@ RunSvcl(args, delayMs := 120, retries := 1) {
 }
 
 SafeTraySetIcon(iconFile) {
+    global activePresetIcon
+    if (iconFile != "")
+        activePresetIcon := iconFile
     try TraySetIcon(iconFile)
 }
 
@@ -119,12 +133,130 @@ UpdateStatusItem(newText, iconFile := "") {
 }
 
 ; ----------------
+; Volume & Audio Tools
+; ----------------
+
+SetMasterVolume(level) {
+    SoundSetVolume(level)
+    vol := Round(SoundGetVolume())
+    ToolTip("Volume: " vol "%")
+    SetTimer(() => ToolTip(), -1500)
+}
+
+AdjustMasterVolume(delta) {
+    currentVol := SoundGetVolume()
+    newVol := Min(100, Max(0, currentVol + delta))
+    SoundSetVolume(newVol)
+    ToolTip("Volume: " Round(newVol) "%")
+    SetTimer(() => ToolTip(), -1500)
+}
+
+ToggleMasterMute(*) {
+    isMuted := SoundGetMute()
+    SoundSetMute(!isMuted)
+    status := !isMuted ? "Muted" : "Unmuted"
+    ToolTip("Audio " status)
+    SetTimer(() => ToolTip(), -1500)
+}
+
+PopulateOutputDevicesMenu() {
+    global OutputDevicesMenu
+    OutputDevicesMenu.Delete()
+    
+    ; Query active playback devices using svcl
+    tempFile := A_Temp "\svcl_devices.csv"
+    try FileDelete(tempFile)
+    
+    RunWait('"' A_ScriptDir '\Resources\svcl.exe" /scomma "' tempFile '"', , "Hide")
+    
+    if FileExist(tempFile) {
+        csvData := FileRead(tempFile)
+        Loop Parse, csvData, "`n", "`r" {
+            if (A_LoopField = "")
+                continue
+            
+            fields := StrSplit(A_LoopField, ",")
+            if (fields.Length >= 5) {
+                deviceName := Trim(fields[1], '"')
+                deviceType := Trim(fields[3], '"')
+                deviceState := Trim(fields[5], '"')
+                
+                if (deviceType = "Render" && deviceState = "Active") {
+                    OutputDevicesMenu.Add(deviceName, GetSetDeviceCallback(deviceName))
+                    SafeMenuIcon(OutputDevicesMenu, deviceName, "Icons\output-device.ico")
+                }
+            }
+        }
+    }
+	
+    deviceCount := 0
+	
+    If (deviceCount = 0)
+    {
+        OutputDevicesMenu.Add("Open Windows Sound Panel", Traditional)
+        SafeMenuIcon(OutputDevicesMenu, "Open Windows Sound Panel", "Icons\as-spe.ico")
+    }
+}
+
+GetSetDeviceCallback(devName) {
+    return (*) => (
+        RunSvcl('/SetDefault "' devName '" 0', 100, 1),
+        RunSvcl('/SetDefault "' devName '" 1', 100, 1),
+        RunSvcl('/SetDefault "' devName '" 2', 100, 1),
+        ToolTip("Default Output: " devName),
+        SetTimer(() => ToolTip(), -1500)
+    )
+}
+
+; ----------------
+; System Tools (Taskbar Auto-Hide)
+; ----------------
+
+ToggleTaskbar(*) {
+    static ABS_AUTOHIDE := 0x1
+    static ABS_ALWAYSONTOP := 0x2
+
+    APPBARDATA := Buffer(A_PtrSize = 8 ? 48 : 36, 0)
+    NumPut("UInt", APPBARDATA.Size, APPBARDATA, 0)
+    
+    state := DllCall("Shell32\SHAppBarMessage", "UInt", 4, "Ptr", APPBARDATA.Ptr, "UInt")
+    
+    if (state & ABS_AUTOHIDE) {
+        NumPut("UInt", ABS_ALWAYSONTOP, APPBARDATA, A_PtrSize = 8 ? 40 : 32)
+        ToolTip("Taskbar: Always On Top")
+    } else {
+        NumPut("UInt", ABS_AUTOHIDE, APPBARDATA, A_PtrSize = 8 ? 40 : 32)
+        ToolTip("Taskbar: Auto-Hide Enabled")
+    }
+    
+    DllCall("Shell32\SHAppBarMessage", "UInt", 10, "Ptr", APPBARDATA.Ptr)
+    SetTimer(() => ToolTip(), -1500)
+    
+    UpdateTaskbarMenu()
+}
+
+UpdateTaskbarMenu() {
+    global Tray
+    static ABS_AUTOHIDE := 0x1
+
+    APPBARDATA := Buffer(A_PtrSize = 8 ? 48 : 36, 0)
+    NumPut("UInt", APPBARDATA.Size, APPBARDATA, 0)
+    state := DllCall("Shell32\SHAppBarMessage", "UInt", 4, "Ptr", APPBARDATA.Ptr, "UInt")
+
+    if (state & ABS_AUTOHIDE) {
+        try Tray.Check("Show/Hide Taskbar Auto-Hide")
+    } else {
+        try Tray.Uncheck("Show/Hide Taskbar Auto-Hide")
+    }
+}
+
+; ----------------
 ; About GUI
 ; ----------------
 
 ShowAbout(*) {
-    version := "v1.06"
-    date := "2026-08-01"
+    version := "v1.07"
+    date := "2026-08-18"
     author := "DestructiveBurn"
     dbUpdates := "https://destructiveburn.com/spatial-audio-switcher/"
     dbgitUpdates := "https://github.com/DestructiveBurn/spatial-audio-switcher/"
@@ -141,20 +273,13 @@ ShowAbout(*) {
 
     changelog := "
     (LTrim
-
-    [ChangeLog v1.05]
-    • Changes & Addons
-      - Added Presets system (up to 5 presets).
-      - Each preset stores Spatial, Speaker Configuration, Default Format, and Exclusivity.
-      - Presets can be saved, loaded, and deleted from the tray menu.
-      - SoundVolumeCommandLine updated through the DB site packaged version.
-
-    [ChangeLog v1.06]
-    • Changes & Addons
-      - Improved preset switching reliability.
-      - Speaker configuration changes now run synchronously and retry once.
-      - Added Ctrl + Alt + 1 through Ctrl + Alt + 5 preset shortcuts.
-      - Added Shortcuts window to the tray menu.
+    [ChangeLog v1.07]
+	• Changed Presets menu structure.
+	• Added Enable Default Switching On Launch.
+    • Added the ability to create Custom Preset Names
+    • Added Volume Control Sub-Menu to both context menus.
+    • Quick volume preset steps, step up/down adjustments, and mute toggle.
+    • Added toggle taskbar auto-hide with shortcut.
     )"
 
     aboutGui.Add("Text", "x20 y+10 w360", changelog)
@@ -202,37 +327,15 @@ ShowShortcuts(*) {
 
     shortcutsText := "
     (LTrim
-
     Tray / Menu
-    • Left-click tray icon:
-      Opens the quick Spatial Audio menu.
-
-    • Right-click tray icon:
-      Opens the full Spatial Audio Switcher menu.
+    • Left-click tray icon: Opens quick Spatial Audio menu.
+    • Right-click tray icon: Opens full Spatial Audio Switcher menu.
 
     Keyboard Shortcuts
-    • Windows + Alt + S:
-      Opens the quick Spatial Audio menu.
-
-    Preset Shortcuts
-    • Ctrl + Alt + 1:
-      Load Preset 1
-
-    • Ctrl + Alt + 2:
-      Load Preset 2
-
-    • Ctrl + Alt + 3:
-      Load Preset 3
-
-    • Ctrl + Alt + 4:
-      Load Preset 4
-
-    • Ctrl + Alt + 5:
-      Load Preset 5
-
-    Optional Desktop Icon Toggle
-    • Triple-click desktop:
-      Shows or hides desktop icons when enabled in the tray menu.
+    • Win + Alt + S: Opens quick Spatial Audio menu.
+	• Win + Alt + T: Toggle taskbar auto-hide.
+	• Win + Alt + S: Opens Left Spatial Audio Menu.
+    • Ctrl + Alt + 1-5: Load Presets 1 through 5.
     )"
 
     shortcutsGui.Add("Text", "x20 y+10 w360", shortcutsText)
@@ -319,7 +422,7 @@ SaveCurrentSettings() {
 RestoreSavedSettings() {
     global configFile
 
-    savedSpatial       := IniRead(configFile, "AudioSettings", "Spatial", "")
+    savedSpatial        := IniRead(configFile, "AudioSettings", "Spatial", "")
     savedSpeakerConfig := IniRead(configFile, "AudioSettings", "SpeakerConfig", "Stereo")
     savedDefaultFormat := IniRead(configFile, "AudioSettings", "DefaultFormat", "16 Bit, 44100 Hz")
     savedExclusivity   := IniRead(configFile, "AudioSettings", "Exclusivity", "Not Exclusive")
@@ -336,6 +439,25 @@ RestoreSavedSettings() {
 ; Audio Apply Functions
 ; ----------------
 
+TriggerTemporaryAtmosIcon() {
+    global atmosTimerActive, activePresetIcon
+    if (FileExist("Icons\dolby.ico")) {
+        try TraySetIcon("Icons\dolby.ico")
+        atmosTimerActive := true
+        SetTimer(RevertTrayIcon, -3000)
+    }
+}
+
+RevertTrayIcon() {
+    global atmosTimerActive, activePresetIcon
+    atmosTimerActive := false
+    if (activePresetIcon != "" && FileExist(activePresetIcon)) {
+        try TraySetIcon(activePresetIcon)
+    } else {
+        try TraySetIcon("Icons\icon.ico")
+    }
+}
+
 ApplySpatialSetting(spatialType, save := true) {
     global currentSpatial, Tray, SpatialMenu
 
@@ -350,7 +472,7 @@ ApplySpatialSetting(spatialType, save := true) {
 
         case "Dolby Atmos":
             RunSvcl("/SetSpatial `"DefaultRenderDevice`" `"Dolby Atmos`"", 150, 1)
-            SafeTraySetIcon("Icons\dolby.ico")
+            TriggerTemporaryAtmosIcon()
             UpdateStatusItem("Dolby Atmos for Headphones", "Icons\dolby.ico")
             try Tray.Enable("&Disable Spatial Audio")
             try SpatialMenu.Enable("&Disable Spatial Audio")
@@ -358,7 +480,7 @@ ApplySpatialSetting(spatialType, save := true) {
 
         case "Dolby Atmos HT":
             RunSvcl("/SetSpatial `"DefaultRenderDevice`" `"Dolby Atmos for home theater`"", 150, 1)
-            SafeTraySetIcon("Icons\dolby.ico")
+            TriggerTemporaryAtmosIcon()
             UpdateStatusItem("Dolby Atmos for Home Theater", "Icons\dolby.ico")
             try Tray.Enable("&Disable Spatial Audio")
             try SpatialMenu.Enable("&Disable Spatial Audio")
@@ -400,10 +522,6 @@ ApplySpeakerConfig(config, save := true) {
         return
 
     mask := SpeakerMasks[config]
-
-    ; Reliability improvement:
-    ; Speaker config changes can occasionally fail when switching quickly.
-    ; RunWait makes it synchronous, and retrying once helps when Windows/audio driver lags.
     RunSvcl("/SetSpeakersConfig `"DefaultRenderDevice`" " mask " " mask " " mask, 175, 2)
 
     SetMenuRadio(
@@ -475,29 +593,20 @@ ApplyExclusivity(exclusive, save := true) {
 ; Compatibility Wrappers
 ; ----------------
 
-Disable(*)          => ApplySpatialSetting("")
-DolbyAtmosEnable(*) => ApplySpatialSetting("Dolby Atmos")
+Disable(*)            => ApplySpatialSetting("")
+DolbyAtmosEnable(*)  => ApplySpatialSetting("Dolby Atmos")
 DolbyAtmosHTEnable(*) => ApplySpatialSetting("Dolby Atmos HT")
-DTSEnable(*)        => ApplySpatialSetting("DTS")
-DTSXHTEnable(*)     => ApplySpatialSetting("DTS:X HT")
-SonicEnable(*)      => ApplySpatialSetting("Windows Sonic")
+DTSEnable(*)         => ApplySpatialSetting("DTS")
+DTSXHTEnable(*)      => ApplySpatialSetting("DTS:X HT")
+SonicEnable(*)       => ApplySpatialSetting("Windows Sonic")
 
-Stereo(*)           => ApplySpeakerConfig("Stereo")
-Quadraphonic(*)     => ApplySpeakerConfig("Quadraphonic")
-FivePointOne(*)     => ApplySpeakerConfig("5.1")
-SevenPointOne(*)    => ApplySpeakerConfig("7.1")
+Stereo(*)            => ApplySpeakerConfig("Stereo")
+Quadraphonic(*)      => ApplySpeakerConfig("Quadraphonic")
+FivePointOne(*)      => ApplySpeakerConfig("5.1")
+SevenPointOne(*)     => ApplySpeakerConfig("7.1")
 
-df1644(*)           => ApplyDefaultFormat("16 Bit, 44100 Hz")
-df1648(*)           => ApplyDefaultFormat("16 Bit, 48000 Hz")
-df1696(*)           => ApplyDefaultFormat("16 Bit, 96000 Hz")
-df16192(*)          => ApplyDefaultFormat("16 Bit, 192000 Hz")
-df2444(*)           => ApplyDefaultFormat("24 Bit, 44100 Hz")
-df2448(*)           => ApplyDefaultFormat("24 Bit, 48000 Hz")
-df2496(*)           => ApplyDefaultFormat("24 Bit, 96000 Hz")
-df24192(*)          => ApplyDefaultFormat("24 Bit, 192000 Hz")
-
-SetExclusive(*)     => ApplyExclusivity("Exclusive")
-SetNonExclusive(*)  => ApplyExclusivity("Not Exclusive")
+SetExclusive(*)      => ApplyExclusivity("Exclusive")
+SetNonExclusive(*)   => ApplyExclusivity("Not Exclusive")
 
 ; ----------------
 ; External Apps
@@ -529,6 +638,7 @@ Volume(*) {
 
 Spatial(*) {
     global SpatialMenu
+    PopulateOutputDevicesMenu()
     SpatialMenu.Show()
 }
 
@@ -536,11 +646,55 @@ Spatial(*) {
 ; Presets
 ; ----------------
 
+GetPresetName(slot) {
+    global configFile
+    return IniRead(configFile, "Preset" slot, "Name", "Preset " slot)
+}
+
+SetPresetName(slot, name) {
+    global configFile
+    name := SubStr(Trim(name), 1, 32)
+    if (name = "")
+        name := "Preset " slot
+    IniWrite(name, configFile, "Preset" slot, "Name")
+    UpdatePresetsMenu()
+}
+
+PromptRenamePreset(slot) {
+    currentName := GetPresetName(slot)
+	
+    iconFile := IniRead(configFile, "Preset" slot, "IconFile", "Icons\preset" slot ".ico")
+    if (!FileExist(iconFile))
+        iconFile := "Icons\preset1.ico"
+
+    renameGui := Gui("+AlwaysOnTop -MinimizeBox -MaximizeBox +Owner", "Rename Preset " slot)
+    renameGui.BackColor := "2D2D2D"
+    renameGui.SetFont("cF5F5F5 s10", "Segoe UI")
+
+    renameGui.Add("Text", "x15 y15 w270", "Enter profile name (Max 32 chars):")
+    editName := renameGui.Add("Edit", "x15 y+8 w270 c000000 Limit32", currentName)
+
+    btnSave := renameGui.Add("Button", "x60 y+15 w80 h28 Default", "Save")
+    btnCancel := renameGui.Add("Button", "x150 yp w80 h28", "Cancel")
+
+    btnSave.OnEvent("Click", (*) => (SetPresetName(slot, editName.Value), renameGui.Destroy()))
+    btnCancel.OnEvent("Click", (*) => renameGui.Destroy())
+
+    renameGui.Show("w300 h125")
+	
+    if FileExist(iconFile) {
+        hIcon := LoadPicture(iconFile, "w32 h32", &imgType)
+        if (hIcon) {
+            SendMessage(0x0080, 0, hIcon, renameGui.Hwnd)
+            SendMessage(0x0080, 1, hIcon, renameGui.Hwnd)
+        }
+    }
+}
+
 SavePreset(slot) {
     global configFile, currentSpatial, currentSpeakerConfig, currentDefaultFormat, currentExclusivity
 
     slot := Integer(slot)
-
     if (slot < 1 || slot > 5)
         return
 
@@ -562,7 +716,6 @@ LoadPreset(slot) {
     global configFile
 
     slot := Integer(slot)
-
     if (slot < 1 || slot > 5)
         return
 
@@ -571,21 +724,13 @@ LoadPreset(slot) {
     presetSpatial := IniRead(configFile, section, "Spatial", "")
     presetSpeaker := IniRead(configFile, section, "SpeakerConfig", "")
 
-    if (presetSpatial = "" && presetSpeaker = "") {
+    if (presetSpatial = "" && presetSpeaker = "")
         return
-    }
 
     presetFormat   := IniRead(configFile, section, "DefaultFormat", "16 Bit, 44100 Hz")
     presetExcl     := IniRead(configFile, section, "Exclusivity", "Not Exclusive")
     presetIconFile := IniRead(configFile, section, "IconFile", "")
 
-    ; Apply in this order:
-    ; 1. Spatial audio
-    ; 2. Speaker configuration
-    ; 3. Default format
-    ; 4. Exclusivity
-    ;
-    ; Speaker configuration uses RunWait and a retry to reduce missed changes.
     ApplySpatialSetting(presetSpatial, false)
     Sleep 150
     ApplySpeakerConfig(presetSpeaker, false)
@@ -605,7 +750,6 @@ DeletePreset(slot) {
     global configFile
 
     slot := Integer(slot)
-
     if (slot < 1 || slot > 5)
         return
 
@@ -618,32 +762,18 @@ DeletePreset(slot) {
     UpdatePresetsMenu()
 }
 
-SavePreset1(*)   => SavePreset(1)
-SavePreset2(*)   => SavePreset(2)
-SavePreset3(*)   => SavePreset(3)
-SavePreset4(*)   => SavePreset(4)
-SavePreset5(*)   => SavePreset(5)
-
-LoadPreset1(*)   => LoadPreset(1)
-LoadPreset2(*)   => LoadPreset(2)
-LoadPreset3(*)   => LoadPreset(3)
-LoadPreset4(*)   => LoadPreset(4)
-LoadPreset5(*)   => LoadPreset(5)
-
-DeletePreset1(*) => DeletePreset(1)
-DeletePreset2(*) => DeletePreset(2)
-DeletePreset3(*) => DeletePreset(3)
-DeletePreset4(*) => DeletePreset(4)
-DeletePreset5(*) => DeletePreset(5)
-
 UpdatePresetsMenu() {
-    global PresetsMenu, configFile
+    global PresetsMenu, DefaultPresetMenu, configFile, defaultPresetSlot, defaultPresetEnabled
 
     if !IsObject(PresetsMenu)
         return
 
+    PresetsMenu.Delete()
+
     Loop 5 {
-        section := "Preset" A_Index
+        slot := A_Index
+        pName := GetPresetName(slot)
+        section := "Preset" slot
         hasData := false
 
         if FileExist(configFile) {
@@ -656,17 +786,90 @@ UpdatePresetsMenu() {
                 hasData := true
         }
 
-        loadItemName := "Load Preset " A_Index
-        deleteItemName := "Delete Preset " A_Index
+        itemMenu := Menu()
 
-        if (hasData) {
-            try PresetsMenu.Enable(loadItemName)
-            try PresetsMenu.Enable(deleteItemName)
-        } else {
-            try PresetsMenu.Disable(loadItemName)
-            try PresetsMenu.Disable(deleteItemName)
-        }
+        itemMenu.Add("Load", GetLoadPresetCallback(slot))
+        SafeMenuIcon(itemMenu, "Load", "Icons\preset.ico")
+        if (!hasData)
+            itemMenu.Disable("Load")
+
+        itemMenu.Add("Save Current State", GetSavePresetCallback(slot))
+        SafeMenuIcon(itemMenu, "Save Current State", "Icons\preset.ico")
+
+        itemMenu.Add("Rename", GetRenamePresetCallback(slot))
+        SafeMenuIcon(itemMenu, "Rename", "Icons\preset.ico")
+
+        itemMenu.Add("Delete", GetDeletePresetCallback(slot))
+        SafeMenuIcon(itemMenu, "Delete", "Icons\preset.ico")
+        if (!hasData)
+            itemMenu.Disable("Delete")
+
+        PresetsMenu.Add(pName, itemMenu)
+        SafeMenuIcon(PresetsMenu, pName, "Icons\preset.ico")
+
+        if (hasData)
+            PresetsMenu.Check(pName)
     }
+
+    PresetsMenu.Add() ; Separator
+
+    DefaultPresetMenu := Menu()
+    PresetsMenu.Add("Default Startup Preset Settings", DefaultPresetMenu)
+
+    DefaultPresetMenu.Add("Enable Default Switching On Launch", ToggleDefaultSwitching)
+    if (defaultPresetEnabled)
+        DefaultPresetMenu.Check("Enable Default Switching On Launch")
+
+    DefaultPresetMenu.Add()
+    DefaultPresetMenu.Add("None", (*) => SetDefaultPresetSlot(0))
+    if (defaultPresetSlot = 0)
+        DefaultPresetMenu.Check("None")
+
+    Loop 5 {
+        slot := A_Index
+        pName := GetPresetName(slot)
+        DefaultPresetMenu.Add(pName, GetSetDefaultSlotCallback(slot))
+        if (defaultPresetSlot = slot)
+            DefaultPresetMenu.Check(pName)
+    }
+}
+
+ToggleDefaultSwitching(*) {
+    global defaultPresetEnabled, configFile
+    defaultPresetEnabled := !defaultPresetEnabled
+    IniWrite(defaultPresetEnabled ? "1" : "0", configFile, "DefaultSettings", "DefaultPresetEnabled")
+    UpdatePresetsMenu()
+}
+
+SetDefaultPresetSlot(slot) {
+    global defaultPresetSlot, configFile
+    defaultPresetSlot := slot
+    IniWrite(slot, configFile, "DefaultSettings", "DefaultPresetSlot")
+    UpdatePresetsMenu()
+}
+
+GetSetDefaultSlotCallback(slot) {
+    return (*) => SetDefaultPresetSlot(slot)
+}
+
+GetRenamePresetCallback(slot) {
+    return (*) => PromptRenamePreset(slot)
+}
+
+GetSavePresetCallback(slot) {
+    return (*) => SavePreset(slot)
+}
+
+GetLoadPresetCallback(slot) {
+    return (*) => LoadPreset(slot)
+}
+
+GetDeletePresetCallback(slot) {
+    return (*) => DeletePreset(slot)
+}
+
+GetDefaultFormatCallback(formatName) {
+    return (*) => ApplyDefaultFormat(formatName)
 }
 
 ApplyPresetIconForCurrentSettings() {
@@ -696,6 +899,13 @@ ApplyPresetIconForCurrentSettings() {
 
             break
         }
+    }
+}
+
+CheckStartupPreset() {
+    global defaultPresetEnabled, defaultPresetSlot
+    if (defaultPresetEnabled && defaultPresetSlot > 0) {
+        LoadPreset(defaultPresetSlot)
     }
 }
 
@@ -754,8 +964,29 @@ DefaultFormat := Menu()
 Exclusivity := Menu()
 SpatialApps := Menu()
 PresetsMenu := Menu()
+VolumeMenu := Menu()
+OutputDevicesMenu := Menu()
 
-; Main tray menu.
+; Construct Output Devices Sub-Menu
+PopulateOutputDevicesMenu()
+
+; Construct Volume Control Sub-Menu
+VolumeMenu.Add("Mute / Unmute", ToggleMasterMute)
+SafeMenuIcon(VolumeMenu, "Mute / Unmute", "Icons\volume-mixer.ico")
+VolumeMenu.Add()
+VolumeMenu.Add("100%", (*) => SetMasterVolume(100))
+VolumeMenu.Add("80%", (*) => SetMasterVolume(80))
+VolumeMenu.Add("60%", (*) => SetMasterVolume(60))
+VolumeMenu.Add("40%", (*) => SetMasterVolume(40))
+VolumeMenu.Add("20%", (*) => SetMasterVolume(20))
+VolumeMenu.Add()
+VolumeMenu.Add("Volume Up (+5%)", (*) => AdjustMasterVolume(5))
+VolumeMenu.Add("Volume Down (-5%)", (*) => AdjustMasterVolume(-5))
+VolumeMenu.Add()
+VolumeMenu.Add("Open Windows Volume Mixer", Volume)
+SafeMenuIcon(VolumeMenu, "Open Windows Volume Mixer", "Icons\volume-mixer.ico")
+
+; Main Tray Menu
 Tray.Add("Disabled", Empty)
 
 Tray.Add("&Disable Spatial Audio", Disable)
@@ -781,6 +1012,9 @@ SafeMenuIcon(Select, "DTS:X for Home Theater", "Icons\dts.ico")
 
 Select.Add("Windows &Sonic for Headphones", SonicEnable)
 SafeMenuIcon(Select, "Windows &Sonic for Headphones", "Icons\sonic.ico")
+
+Tray.Add("Playback &Device Switcher", OutputDevicesMenu)
+SafeMenuIcon(Tray, "Playback &Device Switcher", "Icons\output-device.ico")
 
 Tray.Add("&Audio Settings", Settings)
 SafeMenuIcon(Tray, "&Audio Settings", "Icons\audio-settings.ico")
@@ -829,17 +1063,21 @@ SafeMenuIcon(Exclusivity, "&Not Exclusive", "Icons\exclusivity.ico")
 Tray.Add("&Presets", PresetsMenu)
 SafeMenuIcon(Tray, "&Presets", "Icons\preset.ico")
 
-AddPresetMenuItems()
-
 Tray.Add()
-Tray.Add("&Volume Mixer", Volume)
-SafeMenuIcon(Tray, "&Volume Mixer", "Icons\volume-mixer.ico")
 
-Tray.Add()
+; Utility Features Section (Tray Menu)
+Tray.Add("Show/Hide Taskbar Auto-Hide", ToggleTaskbar)
+SafeMenuIcon(Tray, "Show/Hide Taskbar Auto-Hide", "Icons\taskbar.ico")
 
 Tray.Add("Shows/Hide Desktop Icons Triple-Click", ToggleDesktopIcons)
 SafeMenuIcon(Tray, "Shows/Hide Desktop Icons Triple-Click", "Icons\showhide.ico")
 UpdateDesktopIconsMenu()
+
+Tray.Add()
+
+; Attach Volume Control to Bottom of Tray Menu
+Tray.Add("&Volume Control", VolumeMenu)
+SafeMenuIcon(Tray, "&Volume Control", "Icons\volume-mixer.ico")
 
 Tray.Add()
 
@@ -864,7 +1102,7 @@ SafeMenuIcon(Tray, "Shortcuts", "Icons\shortcuts.ico")
 Tray.Add("Donate", (*) => Run("https://www.paypal.com/donate?hosted_button_id=ZJGYBNSCSDFBG"))
 SafeMenuIcon(Tray, "Donate", "Icons\donate.ico")
 
-; Simple left-click tray menu.
+; Quick Spatial Audio Menu (Left-Click)
 SpatialMenu.Add("&Disable Spatial Audio", Disable)
 SafeMenuIcon(SpatialMenu, "&Disable Spatial Audio", "Icons\disable.ico")
 SpatialMenu.Disable("&Disable Spatial Audio")
@@ -906,6 +1144,12 @@ SafeMenuIcon(SpatialApps, "DTS Sound &Unbound", "Icons\dts.ico")
 SpatialMenu.Add("&Sound", Traditional)
 SafeMenuIcon(SpatialMenu, "&Sound", "Icons\as-spe.ico")
 
+SpatialMenu.Add()
+
+; Attach Volume Control to Bottom of Quick Spatial Menu
+SpatialMenu.Add("&Volume Control", VolumeMenu)
+SafeMenuIcon(SpatialMenu, "&Volume Control", "Icons\volume-mixer.ico")
+
 Tray.Add()
 Tray.Add("Spatial Audio Switcher", Spatial)
 Tray.Default := "Spatial Audio Switcher"
@@ -913,53 +1157,12 @@ Tray.Disable("Spatial Audio Switcher")
 Tray.ClickCount := 1
 
 ; ----------------
-; Menu Helper Builders
-; ----------------
-
-AddPresetMenuItems() {
-    global PresetsMenu
-
-    Loop 5 {
-        slot := A_Index
-
-        PresetsMenu.Add("Save Preset " slot, GetSavePresetCallback(slot))
-        SafeMenuIcon(PresetsMenu, "Save Preset " slot, "Icons\preset.ico")
-
-        PresetsMenu.Add("Load Preset " slot, GetLoadPresetCallback(slot))
-        SafeMenuIcon(PresetsMenu, "Load Preset " slot, "Icons\preset.ico")
-
-        PresetsMenu.Add("Delete Preset " slot, GetDeletePresetCallback(slot))
-        SafeMenuIcon(PresetsMenu, "Delete Preset " slot, "Icons\preset.ico")
-
-        if (slot < 5)
-            PresetsMenu.Add()
-    }
-}
-
-GetSavePresetCallback(slot) {
-    return (*) => SavePreset(slot)
-}
-
-GetLoadPresetCallback(slot) {
-    return (*) => LoadPreset(slot)
-}
-
-GetDeletePresetCallback(slot) {
-    return (*) => DeletePreset(slot)
-}
-
-GetDefaultFormatCallback(formatName) {
-    return (*) => ApplyDefaultFormat(formatName)
-}
-
-; ----------------
 ; Hotkeys
 ; ----------------
 
-; Opens quick Spatial Audio menu.
 #!s::SpatialMenu.Show()
+#!t::ToggleTaskbar()
 
-; Preset shortcuts.
 ^!1::LoadPreset(1)
 ^!2::LoadPreset(2)
 ^!3::LoadPreset(3)
@@ -967,11 +1170,13 @@ GetDefaultFormatCallback(formatName) {
 ^!5::LoadPreset(5)
 
 ; ----------------
-; Startup Restore
+; Initialization
 ; ----------------
 
 RestoreSavedSettings()
-ApplyPresetIconForCurrentSettings()
 UpdatePresetsMenu()
+CheckStartupPreset()
+ApplyPresetIconForCurrentSettings()
+UpdateTaskbarMenu()
 
 ; END
