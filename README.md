@@ -126,7 +126,8 @@ All icons used in this project are attributed to their respective creators:
 | GitHub             | [Flaticon - GitHub](https://www.flaticon.com/free-icon/github_733553) |
 | Power              | [Flaticon - Power Button](https://www.flaticon.com/free-icon/power-button_3292455) |
 | Monitor            | [Flaticon - LCD](https://www.flaticon.com/free-icon/lcd_9753891) |
-
+| Taskbar            | [Flaticon - Window](https://www.flaticon.com/free-icon/window_16782200) |
+| Playback Switcher  | [Flaticon - Cable Connector](https://www.flaticon.com/free-icon/cable-connector_6323843) |
 
 ## ℹ️ About GUI
 On all versions from v1.02, there will be a Changelog in that version of the Spatial Audio Switcher.exe. To see the main changelog, scroll down this page to see the full extent of the updates done below.  On the Spatial Audio Switcher, click on "About" to see the current changelog of that version and "Shortcuts" to see the main shortcuts you can add.
