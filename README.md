@@ -2,7 +2,7 @@
 # Spatial Audio Switcher
 
 <div align="center">
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.06/Spatial-Audio-Switcher-v1.06-2.webp" alt="Spatial Audio Switcher Logo" width="150px" height="150px">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.07/Spatial-Audio-Switcher-v1.07-2.webp" alt="Spatial Audio Switcher Logo" width="150px" height="150px">
 </div>
 
 **Project Maintainer**: [DestructiveBurn](http://destructiveburn.com/destructiveburn)  
@@ -11,7 +11,7 @@
 **DB Main Site Source**: [Spatial Audio Switcher](https://destructiveburn.com/spatial-audio-switcher/)  
 
 <div>
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.06/Spatial-Audio-Switcher-v1.06-1.webp" alt="Spatial Audio Switcher Logo" width="auto" height="400px">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.07/Spatial-Audio-Switcher-v1.07-1.webp" alt="Spatial Audio Switcher Logo" width="auto" height="400px">
 </div>
 
 ## ℹ️ What is Spatial Audio Switcher?
@@ -27,6 +27,10 @@ It runs from the system tray and allows you to change default audio device setti
 - DTS Headphone:X
 - DTS:X for Home Theatre
 - Windows Sonic for Headphones
+- 
+### 🖥️ Playback Device Switcher
+- Opens Windows Sound Panel.
+It’s the same as Sound but less confusing to some.
 
 ### ⚙️ Audio Settings
 - **Advanced**: Opens SoundVolumeView by NirSoft
@@ -47,17 +51,29 @@ It runs from the system tray and allows you to change default audio device setti
 | 16 Bit    | 44100 Hz, 48000 Hz, 96000 Hz, 192000 Hz |
 | 24 Bit    | 44100 Hz, 48000 Hz, 96000 Hz, 192000 Hz |
 
-### 🔒 Exclusivity
+### 🎛️ Exclusivity
 - **Exclusive**: Allows applications to take exclusive control
 - **Not Exclusive**: Prevents exclusive control
 
 *Note: Some audio applications request exclusive mode for higher quality playback, but this prevents other apps from playing sounds simultaneously.*
 
-### 🎚️ Volume Mixer
-Quickly adjust individual application volumes.
+### 💾 Presets
+- Allows you to set up and save your own custom sound settings.
+- Sound settings can easily be switched by keyboard shortcuts by pressing Ctrl + Alt +1 to 5.
+- You can enable default switching on startup to your favourite preset.
+- Preset names can be customized.
+
+### 🔊 Volume Control
+- You can Mute/Unmute
+- Change the volume to the fixed options.
+- Open Windows Volume Mixer
+
+### 🖥️ Show/Hide Taskbar Auto-Hide
+- Quickly show/hide your desktop’s taskbar.
+- Can be easily switched by keyboard shortcuts by pressing Win + Alt +T
 
 ### 🖥️ Show/Hide Desktop Icons
-Double-click on the desktop to toggle icon visibility.
+Triple-click on the desktop to toggle icon visibility.
 
 ### 🚀 Start With Windows
 Adds a shortcut to:  
@@ -69,15 +85,15 @@ Adds a shortcut to:
 - **About**: Version information and changelog
 - **Shortcuts**: Displays key combinations to quickly open, adjust or apply.
 
-### 🖼️ Preview
+### 🪟 Preview
 - You can open this menu by left-clicking on the tray icon or using the Windows + Alt + S shortcut.
 <div>
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.06/Spatial-Audio-Switcher-v1.06-3.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.07/Spatial-Audio-Switcher-v1.07-3.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
 </div>
 
 - This one is opened by right-clicking on the tray icon.
 <div>
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.06/Spatial-Audio-Switcher-v1.06-4.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.07/Spatial-Audio-Switcher-v1.07-4.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
 </div>
 
 ## 📥 Installation
@@ -113,9 +129,9 @@ All icons used in this project are attributed to their respective creators:
 
 
 ## ℹ️ About GUI
-On all versions from v1.02, there will be a Changelog in that version of the Spatial Audio Switcher.exe. To see the main changelog, scroll down this page to see the full extent of the updates done below.  On the Spatial Audio Switcher, click on “About” to see the current changelog of that version and “Shortcuts” to see the main shortcuts you can add.
+On all versions from v1.02, there will be a Changelog in that version of the Spatial Audio Switcher.exe. To see the main changelog, scroll down this page to see the full extent of the updates done below.  On the Spatial Audio Switcher, click on "About" to see the current changelog of that version and "Shortcuts" to see the main shortcuts you can add.
 <div>
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.06/Spatial-Audio-Switcher-v1.06-5.webp" alt="Spatial Audio Switcher Logo" width="auto" height="400px">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.07/Spatial-Audio-Switcher-v1.07-5.webp" alt="Spatial Audio Switcher Logo" width="auto" height="400px">
 </div>
 
 
