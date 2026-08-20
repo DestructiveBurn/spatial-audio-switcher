@@ -1,17 +1,17 @@
-
 # Spatial Audio Switcher
 
 <div align="center">
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.07/Spatial-Audio-Switcher-v1.07-2.webp" alt="Spatial Audio Switcher Logo" width="150px" height="150px">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.08/Spatial-Audio-Switcher-v1.08-2.webp" alt="Spatial Audio Switcher Logo" width="150px" height="150px">
 </div>
 
 **Project Maintainer**: [DestructiveBurn](http://destructiveburn.com/destructiveburn)  
 **Tools Used**: [Nirsoft SoundVolumeCommandLine](https://www.nirsoft.net/utils/sound_volume_command_line.html) & [Nirsoft SoundVolumeView](https://www.nirsoft.net/utils/sound_volume_view.html)  
 **Donate**: If you wish to support the work I've done, you can do so here: [Paypal](https://www.paypal.com/donate?hosted_button_id=ZJGYBNSCSDFBG)  
 **DB Main Site Source**: [Spatial Audio Switcher](https://destructiveburn.com/spatial-audio-switcher/)  
+**Contact DB**: [DB Chat](https://destructiveburn.com/chat/)  
 
 <div>
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.07/Spatial-Audio-Switcher-v1.07-1.webp" alt="Spatial Audio Switcher Logo" width="auto" height="400px">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.08/Spatial-Audio-Switcher-v1.08-1.webp" alt="Spatial Audio Switcher Logo" width="auto" height="400px">
 </div>
 
 ## ℹ️ What is Spatial Audio Switcher?
@@ -88,12 +88,12 @@ Adds a shortcut to:
 ### 🪟 Preview
 - You can open this menu by left-clicking on the tray icon or using the Windows + Alt + S shortcut.
 <div>
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.07/Spatial-Audio-Switcher-v1.07-3.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.08/Spatial-Audio-Switcher-v1.08-3.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
 </div>
 
 - This one is opened by right-clicking on the tray icon.
 <div>
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.07/Spatial-Audio-Switcher-v1.07-4.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.08/Spatial-Audio-Switcher-v1.08-4.webp" alt="Spatial Audio Switcher Logo" width="350px" height="auto">
 </div>
 
 ## 📥 Installation
@@ -117,22 +117,31 @@ All icons used in this project are attributed to their respective creators:
 
 | Feature            | Icon Source |
 |--------------------|-------------|
-| Spatial Audio      | [Flaticon - Waves](https://www.flaticon.com/free-icon/waves_13123770) |
-| Audio Settings     | [Flaticon - Settings](https://www.flaticon.com/free-icon/settings_9215341) |
-| Speaker Config     | [Flaticon - Surround Sound](https://www.flaticon.com/free-icon/surround-sound_15091931) |
-| Default Format     | [Flaticon - Music Wave](https://www.flaticon.com/free-icon/music-wave_4020749) |
-| Exclusivity        | [Flaticon - Song](https://www.flaticon.com/free-icon/song_1540646) |
-| Volume Mixer       | [Flaticon - Setting](https://www.flaticon.com/free-icon/setting_9215358) |
-| GitHub             | [Flaticon - GitHub](https://www.flaticon.com/free-icon/github_733553) |
-| Power              | [Flaticon - Power Button](https://www.flaticon.com/free-icon/power-button_3292455) |
-| Monitor            | [Flaticon - LCD](https://www.flaticon.com/free-icon/lcd_9753891) |
-| Taskbar            | [Flaticon - Window](https://www.flaticon.com/free-icon/window_16782200) |
-| Playback Switcher  | [Flaticon - Cable Connector](https://www.flaticon.com/free-icon/cable-connector_6323843) |
+| about.ico					| [Flaticon - Flaticon – About](https://www.flaticon.com/free-icon/about_9967632) |
+| as-set.ico				| [Flaticon - Flaticon – Gear](https://www.flaticon.com/free-icon/gear_1790071) |
+| as-svv.ico				| [Flaticon - Flaticon – Sound Volume View](https://www.nirsoft.net/utils/sound_volume_view.html) |
+| audio-settings.ico		| [Flaticon - Flaticon – Settings](https://www.flaticon.com/free-icon/settings_9215341) |
+| default-format.ico		| [Flaticon - Flaticon – Music Wave](https://www.flaticon.com/free-icon/music-wave_4020749) |
+| df.ico					| [Flaticon - Flaticon – Music Wave](https://www.flaticon.com/free-icon/music-wave_4020749) |
+| disable.ico				| [Flaticon - Flaticon – Power Button](https://www.flaticon.com/free-icon/power-button_3292455) |
+| donate.ico				| [Flaticon - Flaticon – PayPal Logo](https://www.flaticon.com/free-icon/logo_11378189) |
+| exclusivity.ico			| [Flaticon - Flaticon – Song](https://www.flaticon.com/free-icon/song_1540646) |
+| exit.ico					| [Flaticon - Flaticon – Cancel](https://www.flaticon.com/free-icon/cancel_16799002) |
+| gh.ico					| [Flaticon - Flaticon – GitHub](https://www.flaticon.com/free-icon/github_270798) |
+| output-device.ico			| [Flaticon - Flaticon – Switches](https://www.flaticon.com/free-icon/switches_8423240) |
+| reload.ico				| [Flaticon - Flaticon – Refresh](https://www.flaticon.com/free-icon/refresh_1082454) |
+| shortcuts.ico				| [Flaticon - Flaticon – Electric Keyboard](https://www.flaticon.com/free-icon/electric-keyboard_6328553) |
+| showhide.ico				| [Flaticon - Flaticon – LCD](https://www.flaticon.com/free-icon/lcd_9753891) |
+| spatial-audio.ico			| [Flaticon - Flaticon – Audio Waves](https://www.flaticon.com/free-icon/audio-waves_5580131) |
+| speaker-configuration.ico	| [Flaticon - laticon – Surround Sound](https://www.flaticon.com/free-icon/surround-sound_15091931) |
+| startup.ico				| [Flaticon - Flaticon – Startup](https://www.flaticon.com/free-icon/startup_9119213) |
+| taskbar.ico				| [Flaticon - Flaticon – Window](https://www.flaticon.com/free-icon/window_16782200) |
+| volume-mixer.ico			| [Flaticon - Flaticon – Setting](https://www.flaticon.com/free-icon/setting_9215358) |
 
 ## ℹ️ About GUI
 On all versions from v1.02, there will be a Changelog in that version of the Spatial Audio Switcher.exe. To see the main changelog, scroll down this page to see the full extent of the updates done below.  On the Spatial Audio Switcher, click on "About" to see the current changelog of that version and "Shortcuts" to see the main shortcuts you can add.
 <div>
-  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.07/Spatial-Audio-Switcher-v1.07-5.webp" alt="Spatial Audio Switcher Logo" width="auto" height="400px">
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.08/Spatial-Audio-Switcher-v1.08-5.webp" alt="Spatial Audio Switcher Logo" width="auto" height="400px">
 </div>
 
 
