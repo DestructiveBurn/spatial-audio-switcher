@@ -171,3 +171,25 @@ I guarantee the code is clean - I wouldn't invest time improving unsafe software
 I've been working with the Spatial Audio Switcher.ahk, and when I compile it to an .exe using AutoHotKey Dash, I've noticed that some antivirus programs are incorrectly flagging the executables. While I haven't seen this issue with Windows Defender, there are definitely some false positives on VirusTotal. Changing the name during compilation alters the results on that site. I can assure you the code is clean. If you're curious, you can download AutoHotKey Dash and compile the Spatial Audio Switcher.ahk yourself to check what VirusTotal says.
 
 I suspect that since this is a script-based tool builder, some users may have employed it for unusual purposes. Who knows? If it weren't safe, I wouldn't be dedicating my time to modding this application.
+
+
+
+## ℹ️ Can't run or blocked from running?
+<div>
+  <img src="https://destructiveburn.com/images/GitHub/Spatial-Audio-Switcher-v1.08/Spatial-Audio-Switcher-v1.08-6.webp" alt="Spatial Audio Switcher Logo" width="auto" height="400px">
+</div>
+
+If you cannot launch Spatial Audio Switcher or the application will not start with Windows, the problem is most likely "Smart App Control" blocking it from running.
+The reason is that AutoHotkey scripts or custom executables aren't signed with a trusted digital certificate; SAC marks them as "untrusted from the internet" and silently prevents them from executing automatically at boot, or throws that pop-up when triggered manually.
+
+**How to fix**
+1. Right-click "Spatial Audio Switcher.exe" and go to "Properties".
+2. On the General Tab at the bottom, you'll see "Security". Check Unblock.
+After that, the problem will be resolved. It might be possible that it will happen on all versions after this, so keep note of it. To double-check if the startup shortcut works again, you can go here:
+
+**Startup Apps**
+1. Press: Win + R and then type in: shell:startup
+Or navigate to: C:\Users\YOUR USERNAME\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+2. Click on Spatial Audio Switcher. If it launches, then it will start with Windows again. If you see Smart App Control again, be sure you unchecked the "Security" on the Spatial Audio Switcher.exe
+
+
