@@ -1,9 +1,10 @@
 #Requires AutoHotkey v2.0
+SetWorkingDir A_ScriptDir
 
 ; ============================================================
 ; Spatial Audio Switcher
 ; Updated by DestructiveBurn
-; v1.07 (Added Audio Tools & Display/System Quick Switches)
+; v1.08 (Added Audio Tools & Display/System Quick Switches)
 ; ============================================================
 
 ; ----------------
@@ -255,8 +256,8 @@ UpdateTaskbarMenu() {
 ; ----------------
 
 ShowAbout(*) {
-    version := "v1.07"
-    date := "2026-08-18"
+    version := "v1.08"
+    date := "2026-08-19"
     author := "DestructiveBurn"
     dbUpdates := "https://destructiveburn.com/spatial-audio-switcher/"
     dbgitUpdates := "https://github.com/DestructiveBurn/spatial-audio-switcher/"
@@ -273,13 +274,9 @@ ShowAbout(*) {
 
     changelog := "
     (LTrim
-    [ChangeLog v1.07]
-	• Changed Presets menu structure.
-	• Added Enable Default Switching On Launch.
-    • Added the ability to create Custom Preset Names
-    • Added Volume Control Sub-Menu to both context menus.
-    • Quick volume preset steps, step up/down adjustments, and mute toggle.
-    • Added toggle taskbar auto-hide with shortcut.
+    [ChangeLog v1.08]
+	• Added higher quality icons.
+	• Updated startup shortcut creation to set the working directory to A_ScriptDir, resolving relative path loading issues on boot.
     )"
 
     aboutGui.Add("Text", "x20 y+10 w360", changelog)
@@ -920,7 +917,8 @@ ToggleStartup(*) {
         try FileDelete A_Startup "\Spatial Audio Switcher.lnk"
         startupEnabled := false
     } else {
-        FileCreateShortcut A_ScriptFullPath, A_Startup "\Spatial Audio Switcher.lnk"
+        ; Added A_ScriptDir as the 3rd parameter (WorkingDir)
+        FileCreateShortcut A_ScriptFullPath, A_Startup "\Spatial Audio Switcher.lnk", A_ScriptDir
         startupEnabled := true
     }
 
